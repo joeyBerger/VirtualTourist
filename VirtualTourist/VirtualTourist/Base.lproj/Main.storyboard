@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="bdr-6R-1sC">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Photo Album View Controller-->
+        <scene sceneID="uVd-YA-qt0">
+            <objects>
+                <viewController storyboardIdentifier="PhotoAlbumViewController" id="w8t-Jb-w6d" customClass="PhotoAlbumViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="aeM-Qh-1dg">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="Bwc-sz-7c5"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="" image="photo" catalog="system" id="RXJ-Te-hbU"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ER6-wf-uc2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-822" y="242"/>
+        </scene>
+        <!--MapViewController-->
+        <scene sceneID="OtL-Fy-t62">
+            <objects>
+                <viewController storyboardIdentifier="MapViewController" id="fu2-HI-1V3" userLabel="MapViewController" customClass="MapViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="PqY-zn-3zl">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="F7E-Cv-bLR">
+                                <rect key="frame" x="0.0" y="44" width="414" height="832"/>
+                                <connections>
+                                    <outlet property="delegate" destination="fu2-HI-1V3" id="g2m-1s-PKL"/>
+                                </connections>
+                            </mapView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="F7E-Cv-bLR" firstAttribute="trailing" secondItem="SZN-dc-8JO" secondAttribute="trailing" id="7Bb-E1-oVx"/>
+                            <constraint firstItem="F7E-Cv-bLR" firstAttribute="top" secondItem="SZN-dc-8JO" secondAttribute="top" id="iCn-RH-SxC"/>
+                            <constraint firstItem="F7E-Cv-bLR" firstAttribute="leading" secondItem="SZN-dc-8JO" secondAttribute="leading" id="iEx-oq-oHV"/>
+                            <constraint firstAttribute="bottom" secondItem="F7E-Cv-bLR" secondAttribute="bottom" constant="20" symbolic="YES" id="zOU-kL-tRi"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="SZN-dc-8JO"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item 1" image="mappin" catalog="system" id="zmQ-Lw-DC0"/>
+                    <connections>
+                        <outlet property="mapView" destination="F7E-Cv-bLR" id="47h-hy-uO4"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="en1-ze-da7" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-823.1884057971015" y="-406.47321428571428"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="yqn-HL-xSf">
+            <objects>
+                <tabBarController id="bdr-6R-1sC" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="u7X-Et-3SM">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="fu2-HI-1V3" kind="relationship" relationship="viewControllers" id="Rcn-pb-Wlr"/>
+                        <segue destination="w8t-Jb-w6d" kind="relationship" relationship="viewControllers" id="x2B-c9-iXw"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ycK-xc-JeS" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1741" y="-82"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="mappin" catalog="system" width="52" height="64"/>
+        <image name="photo" catalog="system" width="64" height="46"/>
+    </resources>
+</document>
