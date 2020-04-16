@@ -121,16 +121,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         photoAlbumViewController.location = placemark.title!
         tabBarController!.selectedIndex = 1
     }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "SegueToYourTabBarController" {
-            if let destVC = segue.destination as? PhotoAlbumViewController {
-                destVC.location = "butt"
-                tabBarController!.selectedIndex = 1
-            }
-        }
-    }
-    
+       
     func switchToDataTabCont(){
         tabBarController!.selectedIndex = 1
     }
