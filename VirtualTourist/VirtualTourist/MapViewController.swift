@@ -84,6 +84,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     }
                     
                     annotation.title = title
+                    
             })
         }
         
@@ -118,7 +119,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         guard let placemark = view.annotation as? MKPointAnnotation else { return }
         
         let photoAlbumViewController = self.tabBarController?.viewControllers?[1] as! PhotoAlbumViewController
-        photoAlbumViewController.location = placemark.title!
+//        photoAlbumViewController.location = placemark.title!
+        
+        print(placemark.coordinate)
+        
+        photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude, page: 0)
+        
         tabBarController!.selectedIndex = 1
     }
        

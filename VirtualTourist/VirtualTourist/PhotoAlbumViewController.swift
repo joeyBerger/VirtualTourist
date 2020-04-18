@@ -19,36 +19,45 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     var myImagme: UIImage = UIImage(named:"placeholder.png")!
     
     var thumbnails: [UIImage] = []
+    
+    private let sectionInsets = UIEdgeInsets(top: 50.0, left: 20.0, bottom: 50.0, right: 20.0)
+    
+    let totalThumbnails = 20
+    var searchInitiated = false
+    var canRemoveThumbnails = false
+    
+    var searchCriteria : SearchCriteria? = nil
+    
     private let flickr = Flickr()
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var PhotoCollectionView: UICollectionView!
+     private let itemsPerRow: CGFloat = 2
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("in viewDidLoad")
-//        for _ in self.items.enumerated() {
-//            let imageview: UIImageView = UIImageView(frame: CGRect(x: 25, y: 25, width: 50, height: 50));
-//            let img : UIImage = UIImage(named:"placeholder.png")!
-//            imageview.image = img
-//            collectionImages.append(imageview)
-//        }
         
-        for index in 0..<20 {
-           let imageName = "placeholder.png"
-           let image = UIImage(named: imageName)
-           thumbnails.append(image!)
-         }
+        resetThumbnails()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("location \(location)")
+        if searchCriteria != nil {
+            downloadImagesReal()
+        }
     }
     
-    
-    
     @IBAction func resetPhotos(_ sender: Any) {
+        searchCriteria?.page += 1
         downloadImagesReal()
+    }
+    
+    func resetThumbnails() {
+        thumbnails.removeAll()
+        for _ in 0..<totalThumbnails {
+          let imageName = "placeholder.png"
+          let image = UIImage(named: imageName)
+          thumbnails.append(image!)
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -56,61 +65,81 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-
-//       let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! CollectionViewCell
         cell.backgroundColor = UIColor.lightGray
         cell.imageView.image = thumbnails[indexPath.item]
-//        let imageview: UIImageView = UIImageView(frame: CGRect(x: 25, y: 25, width: 50, height: 50));
-//        let img = self.myImagme
-//        print(self.myImagme)
-//        imageview.image = img
-//        print("indexPath.item \(indexPath.item)")
-//        cell.contentView.addSubview(collectionImages[indexPath.item])
         
-        
-//        cell.imageView.image = thumbnails[indexPath.item]
+        if (searchInitiated) {
+            cell.imageView.frame = cell.contentView.frame
+            cell.imageView.contentMode = .scaleAspectFill
+        } else {
+            cell.imageView.frame = CGRect(x: cell.contentView.frame.width/2+50/4,
+                                          y: cell.contentView.frame.height/2+50/4,
+                                          width: 50,
+                                          height: 50)
+        }
+
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // handle tap events
-        print("You selected cell #\(indexPath.item)!")
+        if !canRemoveThumbnails {return}
         thumbnails.remove(at: indexPath.item)
         collectionView.deleteItems(at: [indexPath])
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        return CGSize(width:(collectionView.frame.width/2), height: (collectionView.frame.width/2))
-        return CGSize(width: 100, height: 100)
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+
+      let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
+      let availableWidth = view.frame.width - paddingSpace
+      let widthPerItem = availableWidth / itemsPerRow
+      return CGSize(width: widthPerItem, height: widthPerItem)
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets (top: 10, left: 10, bottom: 10, right: 10)
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
+      return sectionInsets
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+      return sectionInsets.left
     }
     
   func downloadImagesReal() {
+    searchInitiated = true
+    resetThumbnails()
+    canRemoveThumbnails = false
     let activityIndicator = UIActivityIndicatorView(style: .gray)
     self.view.addSubview(activityIndicator)
     activityIndicator.frame = self.view.bounds
     activityIndicator.startAnimating()
     
-    
-    
-    flickr.searchFlickrForArray(for: "bs") { searchResults in
-      print("searchResults \(searchResults)")
+    flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
       
       for (i,_) in searchResults.enumerated() {
         self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
-//            self.thumbnails.append(image)
             self.thumbnails[i] = image
             if (self.thumbnails.count == searchResults.count) {
               activityIndicator.removeFromSuperview()
+                self.canRemoveThumbnails = true
+//                self.searchInitiated = false
             }
             self.collectionView?.reloadData()
         }
       }
     }
   }
+}
+
+
+struct SearchCriteria {
+    let latitude: Double
+    let longitude: Double
+    var page: Int = 1
+    let perPage: Int = PhotoAlbumViewController().totalThumbnails
 }
