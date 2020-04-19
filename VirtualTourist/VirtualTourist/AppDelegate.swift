@@ -12,10 +12,26 @@ import CoreData
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    var window: UIWindow?
+    
+    let dataController = DataController(modelName: "VirtualTouristModel")
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        
+        //TODO: have looked exhaustively for way to set UITabBarController as root view controller
+//        dataController.load()
+       
+//        self.window = UIWindow(frame: UIScreen.main.bounds)
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        let tabBarController  = storyboard.instantiateViewController(withIdentifier: "HomeTabBarController") as! UITabBarController
+//        let mapViewController = tabBarController.viewControllers?.first  as! MapViewController
+//        mapViewController.testVAR = 566
+//        window?.rootViewController = tabBarController
+//        window?.makeKeyAndVisible()
+        
         return true
     }
 

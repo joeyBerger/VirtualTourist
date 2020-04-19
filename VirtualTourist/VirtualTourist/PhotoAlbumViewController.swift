@@ -37,7 +37,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     var noImagesLabel: UILabel = UILabel()
     
-     private let itemsPerRow: CGFloat = 2
+    var dataController: DataController!
+    
+    private let itemsPerRow: CGFloat = 2
     
     override func viewDidLoad() {
         super.viewDidLoad()

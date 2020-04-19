@@ -83,7 +83,7 @@
         <!--MapViewController-->
         <scene sceneID="OtL-Fy-t62">
             <objects>
-                <viewController storyboardIdentifier="MapViewController" id="fu2-HI-1V3" userLabel="MapViewController" customClass="MapViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MapViewController" id="fu2-HI-1V3" userLabel="MapViewController" customClass="MapViewController" customModule="VirtualTourist" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="PqY-zn-3zl">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -116,7 +116,7 @@
         <!--Tab Bar Controller-->
         <scene sceneID="yqn-HL-xSf">
             <objects>
-                <tabBarController id="bdr-6R-1sC" sceneMemberID="viewController">
+                <tabBarController storyboardIdentifier="HomeTabBarController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="bdr-6R-1sC" sceneMemberID="viewController">
                     <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="u7X-Et-3SM">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>

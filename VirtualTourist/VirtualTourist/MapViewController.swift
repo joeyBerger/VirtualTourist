@@ -8,14 +8,18 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     
+    let dataController = DataController(modelName: "VirtualTouristModel")
+    
+    var pinInfo: [PinInfo] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("getting to here")
         view.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
         mapView.delegate = self
         
@@ -23,7 +27,31 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         myLongPress.addTarget(self, action: #selector(recognizeLongPress(_:)))
         mapView.addGestureRecognizer(myLongPress)
         
+        dataController.load()
+        
+        let fetchRequest:NSFetchRequest<PinInfo> = PinInfo.fetchRequest()
+        if let result =  try? dataController.viewContext.fetch(fetchRequest) {
+            pinInfo = result
+            setupPinsWithData()
+            let photoAlbumViewController = self.tabBarController?.viewControllers?[1] as! PhotoAlbumViewController
+            photoAlbumViewController.dataController = dataController
+        }
     }
+    
+    func setupPinsWithData() {
+           var annotations = [MKPointAnnotation]()
+           for info in pinInfo {
+              let lat = CLLocationDegrees(info.latitude)
+              let long = CLLocationDegrees(info.longitude)
+              let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+             
+              let annotation = MKPointAnnotation()
+              annotation.coordinate = coordinate
+              annotation.title = info.title
+              annotations.append(annotation)
+           }
+           self.mapView.addAnnotations(annotations)
+       }
     
     @objc private func recognizeLongPress(_ sender: UILongPressGestureRecognizer) {
         //https://stackoverflow.com/questions/27735835/convert-coordinates-to-city-name
@@ -34,7 +62,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             annotation.coordinate = touchCoordinate
             
             mapView.addAnnotation(annotation) //drops the pin
-            print("lat:  \(touchCoordinate.latitude)")
+
             let num = touchCoordinate.latitude as NSNumber
             let formatter = NumberFormatter()
             formatter.maximumFractionDigits = 4
@@ -58,26 +86,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     var title = "Location"
                     // Place details
                     guard let placeMark = placemarks?.first else { return }
-
-                    // Location name
-                    if let locationName = placeMark.location {
-                        print(locationName)
-                    }
-                    // Street address
-                    if let street = placeMark.thoroughfare {
-                        print(street)
-                    }
-                    // City
+      
                     if let city = placeMark.subAdministrativeArea {
                         print(city)
                         title = "\(city), "
                         
                     }
-                    // Zip code
-                    if let zip = placeMark.isoCountryCode {
-                        print(zip)
-                    }
-                    // Country
+
                     if let country = placeMark.country {
                         print(country)
                         title = title != "Location" ? title + country : country
@@ -85,6 +100,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     
                     annotation.title = title
                     
+                    let newPin = PinInfo(context: self.dataController.viewContext)
+                    newPin.latitude = touchCoordinate.latitude
+                    newPin.longitude = touchCoordinate.longitude
+                    newPin.title = title
+                    try? self.dataController.viewContext.save()
             })
         }
         
@@ -104,8 +124,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Set annotation.
         myPinView.annotation = annotation
-        
-        print("latitude: \(annotation.coordinate.latitude), longitude: \(annotation.coordinate.longitude)")
         
         myPinView.canShowCallout = true
         myPinView.calloutOffset = CGPoint(x: -5, y: 5)
