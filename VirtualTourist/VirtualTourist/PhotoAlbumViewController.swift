@@ -147,6 +147,17 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         mapView.addAnnotations([annotation])
     }
     
+    func saveImage(data: Data) {
+        let imageInstance = Image(context: self.dataController.viewContext)
+        imageInstance.img = data
+        do {
+            try self.dataController.viewContext.save()
+               print("Image is saved")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     func downloadImagesReal() {
         searchInitiated = true
         print("resetting thumbnails")
