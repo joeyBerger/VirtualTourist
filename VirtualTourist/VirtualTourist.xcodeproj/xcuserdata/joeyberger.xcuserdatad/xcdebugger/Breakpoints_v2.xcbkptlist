@@ -14,8 +14,8 @@
             filePath = "VirtualTourist/PhotoAlbumViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "194"
-            endingLineNumber = "194"
+            startingLineNumber = "218"
+            endingLineNumber = "218"
             landmarkName = "PhotoAlbumViewController"
             landmarkType = "3">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "VirtualTourist/MapViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "81"
-            endingLineNumber = "81"
+            startingLineNumber = "78"
+            endingLineNumber = "78"
             landmarkName = "recognizeLongPress(_:)"
             landmarkType = "7">
          </BreakpointContent>

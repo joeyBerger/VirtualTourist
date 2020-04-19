@@ -12,22 +12,22 @@ import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate {
 
-    @IBOutlet weak var mapView: MKMapView!
-    
     let dataController = DataController(modelName: "VirtualTouristModel")
-    
     var pinInfo: [PinInfo] = []
+    @IBOutlet weak var mapView: MKMapView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = BackgroundColor().color
+        
+        dataController.load()
+        
         mapView.delegate = self
         
         let myLongPress: UILongPressGestureRecognizer = UILongPressGestureRecognizer()
         myLongPress.addTarget(self, action: #selector(recognizeLongPress(_:)))
         mapView.addGestureRecognizer(myLongPress)
         
-        dataController.load()
+        view.backgroundColor = BackgroundColor().color
         
         let fetchRequest:NSFetchRequest<PinInfo> = PinInfo.fetchRequest()
         if let result =  try? dataController.viewContext.fetch(fetchRequest) {
@@ -55,14 +55,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
        }
     
     @objc private func recognizeLongPress(_ sender: UILongPressGestureRecognizer) {
-        //https://stackoverflow.com/questions/27735835/convert-coordinates-to-city-name
         if sender.state == UIGestureRecognizer.State.began {
             let touchPoint = sender.location(in: mapView)
             let touchCoordinate = mapView.convert(touchPoint, toCoordinateFrom: self.mapView)
             let annotation = MKPointAnnotation()
             annotation.coordinate = touchCoordinate
             
-            mapView.addAnnotation(annotation) //drops the pin
+            mapView.addAnnotation(annotation)
 
             let num = touchCoordinate.latitude as NSNumber
             let formatter = NumberFormatter()
@@ -75,27 +74,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             formatter1.maximumFractionDigits = 4
             formatter1.minimumFractionDigits = 4
             _ = formatter1.string(from: num1)
-//            self.adressLoLa.text = "\(num),\(num1)"
 
-            // Add below code to get address for touch coordinates.
             let geoCoder = CLGeocoder()
             let location = CLLocation(latitude: touchCoordinate.latitude, longitude: touchCoordinate.longitude)
             geoCoder.reverseGeocodeLocation(location, completionHandler:
                 {
                     placemarks, error -> Void in
-
                     var title = "Location"
-                    // Place details
                     guard let placeMark = placemarks?.first else { return }
       
                     if let city = placeMark.subAdministrativeArea {
-                        print(city)
                         title = "\(city), "
-                        
                     }
 
                     if let country = placeMark.country {
-                        print(country)
                         title = title != "Location" ? title + country : country
                     }
                     
@@ -109,67 +101,50 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     self.pinInfo.append(newPin)
             })
         }
-        
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        let myPinIdentifier = "PinAnnotationIdentifier"
+        let pinIdentifier = "PinAnnotationIdentifier"
+        let pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: pinIdentifier)
+        pinView.animatesDrop = true
+        pinView.canShowCallout = true
+        pinView.annotation = annotation
         
-        // Generate pins.
-        let myPinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: myPinIdentifier)
+        pinView.canShowCallout = true
+        pinView.calloutOffset = CGPoint(x: -5, y: 5)
+        pinView.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         
-        // Add animation.
-        myPinView.animatesDrop = true
-        
-        // Display callouts.
-        myPinView.canShowCallout = true
-        
-        // Set annotation.
-        myPinView.annotation = annotation
-        
-        myPinView.canShowCallout = true
-        myPinView.calloutOffset = CGPoint(x: -5, y: 5)
-        myPinView.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
-        
-        return myPinView
+        return pinView
     }
     
     func mapView(_ mapView: MKMapView, annotationView view:  MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        print("map view button")
         guard let placemark = view.annotation as? MKPointAnnotation else { return }
         
         let photoAlbumViewController = self.tabBarController?.viewControllers?[1] as! PhotoAlbumViewController
-//        photoAlbumViewController.location = placemark.title!
         
         print(placemark.coordinate)
         
         photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude, page: 0)
         
+        photoAlbumViewController.appearedViaPin = true
+        
         for info in pinInfo {
             if (placemark.coordinate.latitude == info.latitude &&
                 placemark.coordinate.longitude == info.longitude
                 ) {
-                
                 let fetchRequest:NSFetchRequest<Image> = Image.fetchRequest()
                 let predicate = NSPredicate(format: "pinInfo == %@",info)
                 fetchRequest.predicate = predicate
                 if let result = try? dataController.viewContext.fetch(fetchRequest) {
                     if result.count > 0 {
                         photoAlbumViewController.searchCriteria = nil
-                        print("resseting search criteria")
+                        print("found existing images")
                     }
                 }
                 photoAlbumViewController.pinInfo = info
                 break
             }
         }
-        
-        
-        
-        tabBarController!.selectedIndex = 1
-    }
-       
-    func switchToDataTabCont(){
         tabBarController!.selectedIndex = 1
     }
 }

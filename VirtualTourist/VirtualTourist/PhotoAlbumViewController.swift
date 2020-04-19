@@ -21,6 +21,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     @IBOutlet weak var mapView: MKMapView!
     
     var thumbnails: [UIImage] = []
+    var thumbnailName : [String] = []
+    let thumbnailPlaceholder = "placeholder.png"
     let totalThumbnails = 20
     var canRemoveThumbnails = false
     
@@ -29,6 +31,10 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     private let itemsPerRow: CGFloat = 2
             
     var noImagesLabel: UILabel = UILabel()
+    
+    var storedImages: [Image] = []
+    
+    var appearedViaPin = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,35 +48,54 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        if (!appearedViaPin) {return}
         if searchCriteria != nil {
+            //new pin dropped
             downloadImages()
             setMapPin(searchCriteria!)
             noImagesLabel.isHidden = true
         } else if pinInfo != nil  {
+            //old pin referenced, retrieve data
             let fetchRequest:NSFetchRequest<Image> = Image.fetchRequest()
             let predicate = NSPredicate(format: "pinInfo == %@",pinInfo!)
             fetchRequest.predicate = predicate
             if let result = try? dataController.viewContext.fetch(fetchRequest) {
-                let mapInput = SearchCriteria(latitude: pinInfo!.latitude, longitude: pinInfo!.longitude)
-                setMapPin(mapInput)
-                noImagesLabel.isHidden = result.count > 0
-                for (i,image) in result.enumerated() {
-                    thumbnails[i] = UIImage(data: image.img!)!
-                }
-            } else {
-                noImagesLabel.isHidden = false
+                onSuccessfulRetrievedImageData(result)
+                searchCriteria = SearchCriteria(latitude: pinInfo!.latitude, longitude: pinInfo!.longitude)
             }
-            self.collectionView.reloadData()
-        } else {
-            return
         }
+        appearedViaPin = false
+    }
+    
+    func onSuccessfulRetrievedImageData(_ imageResults: [Image]) {
+        let mapInput = SearchCriteria(latitude: pinInfo!.latitude, longitude: pinInfo!.longitude)
+        setMapPin(mapInput)
+        noImagesLabel.isHidden = imageResults.count > 0
+        canRemoveThumbnails = true
+        storedImages = imageResults
+        thumbnails.removeAll()
+        thumbnailName.removeAll()
+        for (_,image) in imageResults.enumerated() {
+            thumbnails.append(UIImage(data: image.img!)!)
+            thumbnailName.append("")
+        }
+        self.collectionView.reloadData()
     }
     
     @IBAction func resetPhotos(_ sender: Any) {
         if searchCriteria != nil {
             searchCriteria?.page += 1
+            deleteStoredImages(storedImages)
             downloadImages()
         }
+    }
+    
+    func deleteStoredImages(_ images: [Image]) {
+        for (i,_) in images.enumerated() {
+            let image = storedImages[i]
+            dataController.viewContext.delete(image)
+        }
+        try? dataController.viewContext.save()
     }
     
     func setupNoImagesLabel() {
@@ -87,16 +112,61 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     }
     
     func resetThumbnails() {
-        print("resetThumbnails resetThumbnails")
         thumbnails.removeAll()
+        thumbnailName.removeAll()
         for _ in 0..<totalThumbnails {
-          let imageName = "placeholder.png"
+          thumbnailName.append(thumbnailPlaceholder)
+          let imageName = thumbnailPlaceholder
           let image = UIImage(named: imageName)
           thumbnails.append(image!)
         }
         collectionView.reloadData()
     }
 
+    func setMapPin(_ input: SearchCriteria) {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: input.latitude, longitude: input.longitude)
+        let viewRegion = MKCoordinateRegion(center: annotation.coordinate, latitudinalMeters: 30000, longitudinalMeters: 30000)
+        mapView.setRegion(viewRegion, animated: true)
+        mapView.addAnnotations([annotation])
+    }
+    
+    func saveImage(data: Data) {
+        let imageInstance = Image(context: self.dataController.viewContext)
+        imageInstance.img = data
+        imageInstance.pinInfo = pinInfo
+        do {
+            try self.dataController.viewContext.save()
+            storedImages.append(imageInstance)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func downloadImages() {
+        resetThumbnails()
+        canRemoveThumbnails = false
+        flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
+            if searchResults.count == 0 {
+                DispatchQueue.main.async {
+                    self.noImagesLabel.isHidden = false
+                }
+            } else {
+                for (i,_) in searchResults.enumerated() {
+                    self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
+                        self.thumbnails[i] = image
+                        self.thumbnailName[i] = ""
+                        self.saveImage(data: image.pngData()!)
+                        if (i == searchResults.count-1) {
+                            self.canRemoveThumbnails = true
+                        }
+                        self.collectionView?.reloadData()
+                    }
+                  }
+               }
+        }
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return thumbnails.count
     }
@@ -106,11 +176,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         cell.backgroundColor = UIColor.lightGray
         cell.imageView.image = thumbnails[indexPath.item]
         
-        if (cell.imageView.image?.accessibilityIdentifier) != nil {
-            cell.imageView.frame = CGRect(x: 0,
-                                          y: 0,
-                                          width: 50,
-                                          height: 50)
+        if (thumbnailName[indexPath.item]) == thumbnailPlaceholder {
+            cell.imageView.frame = CGRect(x: 0,y: 0,width: 50,height: 50)
+            cell.imageView.contentMode = .scaleAspectFit
         } else {
             cell.imageView.frame = cell.contentView.frame
             cell.imageView.contentMode = .scaleAspectFill
@@ -122,73 +190,24 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if !canRemoveThumbnails {return}
         thumbnails.remove(at: indexPath.item)
+        thumbnailName.remove(at: indexPath.item)
         collectionView.deleteItems(at: [indexPath])
+        let image = storedImages[indexPath.item]
+        deleteStoredImages([image])
     }
     
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
       let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
       let availableWidth = view.frame.width - paddingSpace
       let widthPerItem = availableWidth / itemsPerRow
       return CGSize(width: widthPerItem, height: widthPerItem)
     }
     
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        insetForSectionAt section: Int) -> UIEdgeInsets {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
       return sectionInsets
     }
 
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
       return sectionInsets.left
-    }
-    
-    func setMapPin(_ input: SearchCriteria) {
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: input.latitude, longitude: input.longitude)
-        let viewRegion = MKCoordinateRegion(center: annotation.coordinate, latitudinalMeters: 10000, longitudinalMeters: 10000)
-        mapView.setRegion(viewRegion, animated: true)
-        mapView.addAnnotations([annotation])
-    }
-    
-    func saveImage(data: Data) {
-        let imageInstance = Image(context: self.dataController.viewContext)
-        imageInstance.img = data
-        imageInstance.pinInfo = pinInfo
-        do {
-            try self.dataController.viewContext.save()
-            print("Image is saved \(pinInfo!.title)")
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-    
-    func downloadImages() {
-        resetThumbnails()
-        canRemoveThumbnails = false
-
-        flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
-//        self.totalImagesDownloaded = searchResults.count  //TODO: might not need
-        if searchResults.count == 0 {
-            DispatchQueue.main.async {
-                self.noImagesLabel.isHidden = false
-            }
-        } else {
-            for (i,_) in searchResults.enumerated() {
-                self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
-                    self.thumbnails[i] = image
-                    self.saveImage(data: image.pngData()!)
-                    if (i == searchResults.count-1) {
-                        self.canRemoveThumbnails = true
-                    }
-                    self.collectionView?.reloadData()
-                }
-              }
-           }
-        }
     }
 }
