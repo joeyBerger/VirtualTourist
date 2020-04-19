@@ -8,6 +8,7 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
@@ -40,6 +41,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     var dataController: DataController!
     
     private let itemsPerRow: CGFloat = 2
+    
+    var storedImages: [Image] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -179,6 +182,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
             for (i,_) in searchResults.enumerated() {
                 self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
                     self.thumbnails[i] = image
+                    self.saveImage(data: image.pngData()!)
                     if (i == searchResults.count-1) {
                       activityIndicator.removeFromSuperview()
                         self.canRemoveThumbnails = true

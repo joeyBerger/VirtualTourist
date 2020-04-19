@@ -2,14 +2,16 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15702" systemVersion="19D76" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Image" representedClassName="Image" syncable="YES" codeGenerationType="class">
         <attribute name="img" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <relationship name="pinInfo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PinInfo" inverseName="images" inverseEntity="PinInfo"/>
     </entity>
     <entity name="PinInfo" representedClassName="PinInfo" syncable="YES" codeGenerationType="class">
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="images" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Image" inverseName="pinInfo" inverseEntity="Image"/>
     </entity>
     <elements>
-        <element name="PinInfo" positionX="-54" positionY="-9" width="128" height="88"/>
-        <element name="Image" positionX="-27" positionY="45" width="128" height="58"/>
+        <element name="PinInfo" positionX="-7733.796875" positionY="-3557.15625" width="128" height="103"/>
+        <element name="Image" positionX="-7433.92578125" positionY="-3559.46484375" width="128" height="73"/>
     </elements>
 </model>

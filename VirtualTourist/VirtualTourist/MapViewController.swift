@@ -33,6 +33,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if let result =  try? dataController.viewContext.fetch(fetchRequest) {
             pinInfo = result
             setupPinsWithData()
+            print(pinInfo[0].images)
+            
+            
+            
             let photoAlbumViewController = self.tabBarController?.viewControllers?[1] as! PhotoAlbumViewController
             photoAlbumViewController.dataController = dataController
         }
@@ -142,6 +146,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         print(placemark.coordinate)
         
         photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude, page: 0)
+        
+        for info in pinInfo {
+            if (placemark.coordinate.latitude == info.latitude &&
+                placemark.coordinate.longitude == info.longitude &&
+                info.images != nil
+                ) {
+                photoAlbumViewController.searchCriteria = nil
+                print("resseting search criteria")
+//                photoAlbumViewController.storedImages = info.images
+//                photoAlbumViewController.thumbnails = info.images
+                break
+            }
+        }
+        
+        
         
         tabBarController!.selectedIndex = 1
     }
