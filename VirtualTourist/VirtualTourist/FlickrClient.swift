@@ -16,9 +16,10 @@ class Flickr {
     case generic
   }
   
-  func searchFlickrForArray(for searchCriteria: SearchCriteria, complettion: @escaping ([[Any]]) -> Void) {
+  func searchFlickrForArray(for searchCriteria: SearchCriteria, complettion: @escaping ([[Any]]?, Error?) -> Void) {
     guard let searchURL = flickrSearchURL(for: searchCriteria) else {
 //      completion(Result.error(Error.unknownAPIResponse))
+        complettion(nil, Error.generic)
       return
     }
     
@@ -81,7 +82,7 @@ class Flickr {
            return returnArr
         }
         
-        complettion(array)
+        complettion(array, nil)
         
       } catch {
 //        completion(Result.error(error))

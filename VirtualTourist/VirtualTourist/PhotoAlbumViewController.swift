@@ -31,9 +31,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     private let itemsPerRow: CGFloat = 2
             
     var noImagesLabel: UILabel = UILabel()
-    
     var storedImages: [Image] = []
-    
     var appearedViaPin = false
 
     override func viewDidLoad() {
@@ -84,7 +82,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     @IBAction func resetPhotos(_ sender: Any) {
         if searchCriteria != nil {
-            searchCriteria?.page += 1
+            pinInfo!.page += 1
+            try? self.dataController.viewContext.save()
+            searchCriteria?.page = Int(pinInfo!.page)
             deleteStoredImages(storedImages)
             downloadImages()
         }
@@ -146,18 +146,23 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func downloadImages() {
         resetThumbnails()
         canRemoveThumbnails = false
-        flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
-            if searchResults.count == 0 {
+        flickr.searchFlickrForArray(for: searchCriteria!) { searchResults, error in
+            if error != nil {
+                print("An error occured downloading images")
+                return
+            }
+            
+            if searchResults!.count == 0 {
                 DispatchQueue.main.async {
                     self.noImagesLabel.isHidden = false
                 }
             } else {
-                for (i,_) in searchResults.enumerated() {
-                    self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
+                for (i,_) in searchResults!.enumerated() {
+                    self.flickr.downloadImageAndReturnImage(imageInfo: searchResults![i]) { image in
                         self.thumbnails[i] = image
                         self.thumbnailName[i] = ""
                         self.saveImage(data: image.pngData()!)
-                        if (i == searchResults.count-1) {
+                        if (i == searchResults!.count-1) {
                             self.canRemoveThumbnails = true
                         }
                         self.collectionView?.reloadData()

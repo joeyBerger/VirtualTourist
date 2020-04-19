@@ -97,6 +97,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     newPin.latitude = touchCoordinate.latitude
                     newPin.longitude = touchCoordinate.longitude
                     newPin.title = title
+                    newPin.page = 1
                     try? self.dataController.viewContext.save()
                     self.pinInfo.append(newPin)
             })
@@ -124,7 +125,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         print(placemark.coordinate)
         
-        photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude, page: 0)
+        photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude, page: 1)
         
         photoAlbumViewController.appearedViaPin = true
         
