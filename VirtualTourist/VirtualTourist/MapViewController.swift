@@ -16,7 +16,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("getting to here")
-        
+        view.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
         mapView.delegate = self
         
         let myLongPress: UILongPressGestureRecognizer = UILongPressGestureRecognizer()
@@ -55,7 +55,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 {
                     placemarks, error -> Void in
 
-                    var title = ""
+                    var title = "Location"
                     // Place details
                     guard let placeMark = placemarks?.first else { return }
 
@@ -80,7 +80,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     // Country
                     if let country = placeMark.country {
                         print(country)
-                        title += country
+                        title = title != "Location" ? title + country : country
                     }
                     
                     annotation.title = title

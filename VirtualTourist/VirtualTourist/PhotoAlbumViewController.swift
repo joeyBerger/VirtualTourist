@@ -6,13 +6,13 @@
 //  Copyright © 2020 Joey Berger. All rights reserved.
 //
 
-import Foundation
 import UIKit
+import MapKit
+
 class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
     var location = ""
     let reuseIdentifier = "ImageCell"
-    var items = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     
     var collectionImages: [UIImageView] = [];
     
@@ -25,30 +25,56 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     let totalThumbnails = 20
     var searchInitiated = false
     var canRemoveThumbnails = false
+    var totalImagesDownloaded = 0
     
     var searchCriteria : SearchCriteria? = nil
     
     private let flickr = Flickr()
+    
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var PhotoCollectionView: UICollectionView!
+    @IBOutlet weak var mapView: MKMapView!
+    
+    var noImagesLabel: UILabel = UILabel()
+    
      private let itemsPerRow: CGFloat = 2
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        view.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
+        collectionView.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
         resetThumbnails()
+        setupNoImagesLabel()
+        collectionView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if searchCriteria != nil {
             downloadImagesReal()
+            setMapPin()
+            noImagesLabel.isHidden = true
         }
     }
     
     @IBAction func resetPhotos(_ sender: Any) {
-        searchCriteria?.page += 1
-        downloadImagesReal()
+        if searchCriteria != nil {
+            searchCriteria?.page += 1
+            downloadImagesReal()
+        }
+    }
+    
+    func setupNoImagesLabel() {
+        let height: CGFloat = 40
+        let testFrame = CGRect(x: 0, y: 0, width: view.frame.width/1.2, height: height)
+        noImagesLabel = UILabel(frame: testFrame)
+        noImagesLabel.center = CGPoint(x: view.frame.size.width/2, y: mapView.frame.maxY+height/2)
+        noImagesLabel.text = "NO IMAGES TO DISPLAY"
+        noImagesLabel.backgroundColor = UIColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1.0)
+        noImagesLabel.alpha = 1
+        noImagesLabel.textColor = UIColor.white
+        noImagesLabel.textAlignment = .center
+        self.view.addSubview(noImagesLabel)
     }
     
     func resetThumbnails() {
@@ -58,6 +84,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
           let image = UIImage(named: imageName)
           thumbnails.append(image!)
         }
+        collectionView.reloadData()
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -69,16 +96,16 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         cell.backgroundColor = UIColor.lightGray
         cell.imageView.image = thumbnails[indexPath.item]
         
-        if (searchInitiated) {
-            cell.imageView.frame = cell.contentView.frame
-            cell.imageView.contentMode = .scaleAspectFill
-        } else {
-            cell.imageView.frame = CGRect(x: cell.contentView.frame.width/2+50/4,
-                                          y: cell.contentView.frame.height/2+50/4,
+        if (cell.imageView.image?.accessibilityIdentifier) != nil {
+            cell.imageView.frame = CGRect(x: 0,
+                                          y: 0,
                                           width: 50,
                                           height: 50)
+        } else {
+            cell.imageView.frame = cell.contentView.frame
+            cell.imageView.contentMode = .scaleAspectFill
         }
-
+        
         return cell
     }
     
@@ -110,30 +137,45 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
       return sectionInsets.left
     }
     
-  func downloadImagesReal() {
-    searchInitiated = true
-    resetThumbnails()
-    canRemoveThumbnails = false
-    let activityIndicator = UIActivityIndicatorView(style: .gray)
-    self.view.addSubview(activityIndicator)
-    activityIndicator.frame = self.view.bounds
-    activityIndicator.startAnimating()
-    
-    flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
-      
-      for (i,_) in searchResults.enumerated() {
-        self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
-            self.thumbnails[i] = image
-            if (self.thumbnails.count == searchResults.count) {
-              activityIndicator.removeFromSuperview()
-                self.canRemoveThumbnails = true
-//                self.searchInitiated = false
-            }
-            self.collectionView?.reloadData()
-        }
-      }
+    func setMapPin() {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: searchCriteria!.latitude, longitude: searchCriteria!.longitude)
+        let viewRegion = MKCoordinateRegion(center: annotation.coordinate, latitudinalMeters: 10000, longitudinalMeters: 10000)
+        mapView.setRegion(viewRegion, animated: true)
+        mapView.addAnnotations([annotation])
     }
-  }
+    
+    func downloadImagesReal() {
+        searchInitiated = true
+        print("resetting thumbnails")
+        resetThumbnails()
+        canRemoveThumbnails = false
+        let activityIndicator = UIActivityIndicatorView(style: .gray)
+//        self.view.addSubview(activityIndicator)
+        activityIndicator.frame = self.view.bounds
+        activityIndicator.startAnimating()
+
+        flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
+//        self.totalImagesDownloaded = searchResults.count  //TODO: might not need
+        if searchResults.count == 0 {
+            DispatchQueue.main.async {
+              activityIndicator.removeFromSuperview()
+                self.noImagesLabel.isHidden = false
+            }
+        } else {
+            for (i,_) in searchResults.enumerated() {
+                self.flickr.downloadImageAndReturnImage(imageInfo: searchResults[i]) { image in
+                    self.thumbnails[i] = image
+                    if (i == searchResults.count-1) {
+                      activityIndicator.removeFromSuperview()
+                        self.canRemoveThumbnails = true
+                    }
+                    self.collectionView?.reloadData()
+                }
+              }
+           }
+        }
+    }
 }
 
 

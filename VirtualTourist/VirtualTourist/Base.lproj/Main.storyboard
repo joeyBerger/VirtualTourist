@@ -16,8 +16,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XfU-TQ-t8a">
+                                <rect key="frame" x="89" y="757" width="236" height="41"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.2310470939" green="0.0" blue="0.86212706569999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="New Collection"/>
+                                <connections>
+                                    <action selector="resetPhotos:" destination="w8t-Jb-w6d" eventType="touchUpInside" id="r2s-ll-xn4"/>
+                                </connections>
+                            </button>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="HqR-Lv-oa3">
+                                <rect key="frame" x="0.0" y="44" width="414" height="167"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </mapView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Yaj-ax-1OE">
-                                <rect key="frame" x="0.0" y="207" width="414" height="542"/>
+                                <rect key="frame" x="0.0" y="232" width="414" height="503"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="RHo-LE-Twj">
@@ -51,19 +65,6 @@
                                     <outlet property="delegate" destination="w8t-Jb-w6d" id="38H-FM-aDE"/>
                                 </connections>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XfU-TQ-t8a">
-                                <rect key="frame" x="89" y="757" width="236" height="41"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" systemColor="systemPurpleColor" red="0.68627450980000004" green="0.32156862749999998" blue="0.87058823529999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <state key="normal" title="New Collection"/>
-                                <connections>
-                                    <action selector="resetPhotos:" destination="w8t-Jb-w6d" eventType="touchUpInside" id="r2s-ll-xn4"/>
-                                </connections>
-                            </button>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="HqR-Lv-oa3">
-                                <rect key="frame" x="0.0" y="44" width="414" height="167"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </mapView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <viewLayoutGuide key="safeArea" id="Bwc-sz-7c5"/>
@@ -72,6 +73,7 @@
                     <connections>
                         <outlet property="PhotoCollectionView" destination="Yaj-ax-1OE" id="xrk-Th-FS6"/>
                         <outlet property="collectionView" destination="Yaj-ax-1OE" id="LY8-6C-xHu"/>
+                        <outlet property="mapView" destination="HqR-Lv-oa3" id="0f2-9P-rec"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ER6-wf-uc2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
