@@ -71,7 +71,6 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="photo" catalog="system" id="RXJ-Te-hbU"/>
                     <connections>
-                        <outlet property="PhotoCollectionView" destination="Yaj-ax-1OE" id="xrk-Th-FS6"/>
                         <outlet property="collectionView" destination="Yaj-ax-1OE" id="LY8-6C-xHu"/>
                         <outlet property="mapView" destination="HqR-Lv-oa3" id="0f2-9P-rec"/>
                     </connections>

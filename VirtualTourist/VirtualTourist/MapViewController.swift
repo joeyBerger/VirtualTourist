@@ -20,7 +20,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
+        view.backgroundColor = BackgroundColor().color
         mapView.delegate = self
         
         let myLongPress: UILongPressGestureRecognizer = UILongPressGestureRecognizer()
@@ -33,7 +33,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if let result =  try? dataController.viewContext.fetch(fetchRequest) {
             pinInfo = result
             setupPinsWithData()
-            print(pinInfo[0].images)
             
             let photoAlbumViewController = self.tabBarController?.viewControllers?[1] as! PhotoAlbumViewController
             photoAlbumViewController.dataController = dataController

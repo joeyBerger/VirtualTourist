@@ -12,43 +12,28 @@ import CoreData
 
 class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
-    var location = ""
-    let reuseIdentifier = "ImageCell"
-    
-    var collectionImages: [UIImageView] = [];
-    
-    var myImagme: UIImage = UIImage(named:"placeholder.png")!
-    
-    var thumbnails: [UIImage] = []
-    
-    private let sectionInsets = UIEdgeInsets(top: 50.0, left: 20.0, bottom: 50.0, right: 20.0)
-    
-    let totalThumbnails = 20
-    var searchInitiated = false
-    var canRemoveThumbnails = false
-    var totalImagesDownloaded = 0
-    
-    var searchCriteria : SearchCriteria? = nil
-    
     private let flickr = Flickr()
-    
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var PhotoCollectionView: UICollectionView!
-    @IBOutlet weak var mapView: MKMapView!
-    
-    var noImagesLabel: UILabel = UILabel()
-    
+    var searchCriteria : SearchCriteria? = nil
     var dataController: DataController!
-    
-    private let itemsPerRow: CGFloat = 2
-    
-    var storedImages: [Image] = []
     var pinInfo : PinInfo? = nil
     
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var mapView: MKMapView!
+    
+    var thumbnails: [UIImage] = []
+    let totalThumbnails = 20
+    var canRemoveThumbnails = false
+    
+    let reuseIdentifier = "ImageCell"
+    let sectionInsets = UIEdgeInsets(top: 50.0, left: 20.0, bottom: 50.0, right: 20.0)
+    private let itemsPerRow: CGFloat = 2
+            
+    var noImagesLabel: UILabel = UILabel()
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
-        collectionView.backgroundColor = UIColor(red: 135/255, green: 206/255, blue: 250/255, alpha: 1)
+        view.backgroundColor = BackgroundColor().color
+        collectionView.backgroundColor = BackgroundColor().color
         resetThumbnails()
         setupNoImagesLabel()
         collectionView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
@@ -56,33 +41,35 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
         if searchCriteria != nil {
-            downloadImagesReal()
-            setMapPin()
+            downloadImages()
+            setMapPin(searchCriteria!)
             noImagesLabel.isHidden = true
-        } else {
-            print("no search criteria")
+        } else if pinInfo != nil  {
             let fetchRequest:NSFetchRequest<Image> = Image.fetchRequest()
             let predicate = NSPredicate(format: "pinInfo == %@",pinInfo!)
             fetchRequest.predicate = predicate
             if let result = try? dataController.viewContext.fetch(fetchRequest) {
-                print(result.count)
-                
-               
+                let mapInput = SearchCriteria(latitude: pinInfo!.latitude, longitude: pinInfo!.longitude)
+                setMapPin(mapInput)
+                noImagesLabel.isHidden = result.count > 0
                 for (i,image) in result.enumerated() {
                     thumbnails[i] = UIImage(data: image.img!)!
                 }
-
-                print(result[0].img!)
+            } else {
+                noImagesLabel.isHidden = false
             }
             self.collectionView.reloadData()
+        } else {
+            return
         }
     }
     
     @IBAction func resetPhotos(_ sender: Any) {
         if searchCriteria != nil {
             searchCriteria?.page += 1
-            downloadImagesReal()
+            downloadImages()
         }
     }
     
@@ -160,9 +147,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
       return sectionInsets.left
     }
     
-    func setMapPin() {
+    func setMapPin(_ input: SearchCriteria) {
         let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: searchCriteria!.latitude, longitude: searchCriteria!.longitude)
+        annotation.coordinate = CLLocationCoordinate2D(latitude: input.latitude, longitude: input.longitude)
         let viewRegion = MKCoordinateRegion(center: annotation.coordinate, latitudinalMeters: 10000, longitudinalMeters: 10000)
         mapView.setRegion(viewRegion, animated: true)
         mapView.addAnnotations([annotation])
@@ -180,21 +167,14 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         }
     }
     
-    func downloadImagesReal() {
-        searchInitiated = true
-        print("resetting thumbnails")
+    func downloadImages() {
         resetThumbnails()
         canRemoveThumbnails = false
-        let activityIndicator = UIActivityIndicatorView(style: .gray)
-//        self.view.addSubview(activityIndicator)
-        activityIndicator.frame = self.view.bounds
-        activityIndicator.startAnimating()
 
         flickr.searchFlickrForArray(for: searchCriteria!) { searchResults in
 //        self.totalImagesDownloaded = searchResults.count  //TODO: might not need
         if searchResults.count == 0 {
             DispatchQueue.main.async {
-              activityIndicator.removeFromSuperview()
                 self.noImagesLabel.isHidden = false
             }
         } else {
@@ -203,7 +183,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
                     self.thumbnails[i] = image
                     self.saveImage(data: image.pngData()!)
                     if (i == searchResults.count-1) {
-                      activityIndicator.removeFromSuperview()
                         self.canRemoveThumbnails = true
                     }
                     self.collectionView?.reloadData()
@@ -212,12 +191,4 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
            }
         }
     }
-}
-
-
-struct SearchCriteria {
-    let latitude: Double
-    let longitude: Double
-    var page: Int = 1
-    let perPage: Int = PhotoAlbumViewController().totalThumbnails
 }
