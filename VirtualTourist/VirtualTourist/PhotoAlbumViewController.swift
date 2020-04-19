@@ -158,7 +158,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
                 }
             } else {
                 for (i,_) in searchResults!.enumerated() {
-                    self.flickr.downloadImageAndReturnImage(imageInfo: searchResults![i]) { image in
+                    self.flickr.downloadAndReturnImage(imageInfo: searchResults![i]) { image in
                         self.thumbnails[i] = image
                         self.thumbnailName[i] = ""
                         self.saveImage(data: image.pngData()!)
