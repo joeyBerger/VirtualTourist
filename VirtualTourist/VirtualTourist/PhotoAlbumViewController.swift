@@ -43,6 +43,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     private let itemsPerRow: CGFloat = 2
     
     var storedImages: [Image] = []
+    var pinInfo : PinInfo? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,6 +60,22 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
             downloadImagesReal()
             setMapPin()
             noImagesLabel.isHidden = true
+        } else {
+            print("no search criteria")
+            let fetchRequest:NSFetchRequest<Image> = Image.fetchRequest()
+            let predicate = NSPredicate(format: "pinInfo == %@",pinInfo!)
+            fetchRequest.predicate = predicate
+            if let result = try? dataController.viewContext.fetch(fetchRequest) {
+                print(result.count)
+                
+               
+                for (i,image) in result.enumerated() {
+                    thumbnails[i] = UIImage(data: image.img!)!
+                }
+
+                print(result[0].img!)
+            }
+            self.collectionView.reloadData()
         }
     }
     
@@ -83,6 +100,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     }
     
     func resetThumbnails() {
+        print("resetThumbnails resetThumbnails")
         thumbnails.removeAll()
         for _ in 0..<totalThumbnails {
           let imageName = "placeholder.png"
@@ -153,9 +171,10 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func saveImage(data: Data) {
         let imageInstance = Image(context: self.dataController.viewContext)
         imageInstance.img = data
+        imageInstance.pinInfo = pinInfo
         do {
             try self.dataController.viewContext.save()
-               print("Image is saved")
+            print("Image is saved \(pinInfo!.title)")
         } catch {
             print(error.localizedDescription)
         }
