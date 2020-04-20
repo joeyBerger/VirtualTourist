@@ -16,23 +16,26 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XfU-TQ-t8a">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XfU-TQ-t8a">
                                 <rect key="frame" x="89" y="757" width="236" height="41"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.2310470939" green="0.0" blue="0.86212706569999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="41" id="Pq3-VF-FEZ"/>
+                                </constraints>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <state key="normal" title="New Collection"/>
                                 <connections>
                                     <action selector="resetPhotos:" destination="w8t-Jb-w6d" eventType="touchUpInside" id="r2s-ll-xn4"/>
                                 </connections>
                             </button>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="HqR-Lv-oa3">
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="HqR-Lv-oa3">
                                 <rect key="frame" x="0.0" y="44" width="414" height="167"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="167" id="ETz-ne-lud"/>
+                                </constraints>
                             </mapView>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Yaj-ax-1OE">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Yaj-ax-1OE">
                                 <rect key="frame" x="0.0" y="232" width="414" height="503"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="RHo-LE-Twj">
                                     <size key="itemSize" width="111" height="97"/>
@@ -67,6 +70,18 @@
                             </collectionView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="Bwc-sz-7c5" firstAttribute="bottom" secondItem="XfU-TQ-t8a" secondAttribute="bottom" constant="15" id="0yE-eA-FyI"/>
+                            <constraint firstItem="HqR-Lv-oa3" firstAttribute="leading" secondItem="aeM-Qh-1dg" secondAttribute="leading" id="241-pR-pKr"/>
+                            <constraint firstAttribute="trailing" secondItem="HqR-Lv-oa3" secondAttribute="trailing" id="B4c-R0-kIh"/>
+                            <constraint firstItem="HqR-Lv-oa3" firstAttribute="leading" secondItem="Yaj-ax-1OE" secondAttribute="leading" id="Jwz-Ta-CW6"/>
+                            <constraint firstItem="Yaj-ax-1OE" firstAttribute="top" secondItem="HqR-Lv-oa3" secondAttribute="bottom" constant="21" id="OhH-tG-ekp"/>
+                            <constraint firstItem="HqR-Lv-oa3" firstAttribute="trailing" secondItem="Yaj-ax-1OE" secondAttribute="trailing" id="SOx-v6-Fx5"/>
+                            <constraint firstItem="HqR-Lv-oa3" firstAttribute="top" secondItem="Bwc-sz-7c5" secondAttribute="top" id="Ybj-EZ-7n8"/>
+                            <constraint firstItem="XfU-TQ-t8a" firstAttribute="leading" secondItem="Bwc-sz-7c5" secondAttribute="leading" constant="89" id="eiQ-kZ-IaZ"/>
+                            <constraint firstItem="XfU-TQ-t8a" firstAttribute="top" secondItem="Yaj-ax-1OE" secondAttribute="bottom" constant="22" id="p4Q-zj-0vA"/>
+                            <constraint firstItem="Yaj-ax-1OE" firstAttribute="centerX" secondItem="XfU-TQ-t8a" secondAttribute="centerX" id="rNT-G5-Iak"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="Bwc-sz-7c5"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="photo" catalog="system" id="RXJ-Te-hbU"/>

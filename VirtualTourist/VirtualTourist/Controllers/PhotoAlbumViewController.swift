@@ -95,7 +95,11 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
             let image = storedImages[i]
             dataController.viewContext.delete(image)
         }
-        try? dataController.viewContext.save()
+        do {
+            try self.dataController.viewContext.save()
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     
     func setupNoImagesLabel() {

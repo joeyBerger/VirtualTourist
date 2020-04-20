@@ -20,22 +20,12 @@ class DataController {
         persistentContainer = NSPersistentContainer(name: modelName)
         print(persistentContainer == nil)
     }
-    
-//    func load() {
-//        persistentContainer.loadPersistentStores { storeDescription, error in
-//            guard error == nil else {
-//                fatalError(error!.localizedDescription)
-//            }
-//        }
-//    }
+
     func load(completion: (() -> Void)? = nil) {
         persistentContainer.loadPersistentStores { storeDescription, error in
             guard error == nil else {
                 fatalError(error!.localizedDescription)
             }
-            print("sucessful load")
-//            self.autoSaveViewContext()
-//            self.configureContexts()
             completion?()
         }
     }

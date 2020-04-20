@@ -14,16 +14,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     
-    let dataController = DataController(modelName: "VirtualTouristModel")
+//    let dataController = DataController(modelName: "VirtualTouristModel")
     
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
         
-        //TODO: have looked exhaustively for way to set UITabBarController as root view controller
+          //TODO: have looked exhaustively for way to set UITabBarController as root view controller, setting up in MapViewController
+          //https://stackoverflow.com/questions/54015256/set-uitabbarcontroller-as-rootviewcontroller/54167059
+        
 //        dataController.load()
-       
 //        self.window = UIWindow(frame: UIScreen.main.bounds)
 //        let storyboard = UIStoryboard(name: "Main", bundle: nil)
 //        let tabBarController  = storyboard.instantiateViewController(withIdentifier: "HomeTabBarController") as! UITabBarController

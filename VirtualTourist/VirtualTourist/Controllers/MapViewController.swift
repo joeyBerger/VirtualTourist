@@ -68,7 +68,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             formatter.maximumFractionDigits = 4
             formatter.minimumFractionDigits = 4
             _ = formatter.string(from: num)
-            print("long: \(touchCoordinate.longitude)")
             let num1 = touchCoordinate.longitude as NSNumber
             let formatter1 = NumberFormatter()
             formatter1.maximumFractionDigits = 4
@@ -123,9 +122,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         let photoAlbumViewController = self.tabBarController?.viewControllers?[1] as! PhotoAlbumViewController
         
-        print(placemark.coordinate)
-        
-        photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude, page: 1)
+        photoAlbumViewController.searchCriteria = SearchCriteria(latitude: placemark.coordinate.latitude, longitude: placemark.coordinate.longitude)
         
         photoAlbumViewController.appearedViaPin = true
         
@@ -139,7 +136,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 if let result = try? dataController.viewContext.fetch(fetchRequest) {
                     if result.count > 0 {
                         photoAlbumViewController.searchCriteria = nil
-                        print("found existing images")
                     }
                 }
                 photoAlbumViewController.pinInfo = info
